@@ -10,6 +10,14 @@ def bytes_to_hex(data):
     """Convert a list of byte values to an uppercase hex string."""
     return bytes(data).hex().upper()
 
+def text_to_bytes(string):
+    """Convert a UTF-8 string to a list of byte values."""
+    return list(string.encode('utf-8'))
+
+def bytes_to_text(data):
+    """Convert a list of byte values to a UTF-8 string."""
+    return bytes(data).decode('utf-8')
+
 def key_scheduling(key):
     """KSA: build the initial permuted state array from the key."""
     if not key:
@@ -37,15 +45,23 @@ def xor(data1, data2):
     """XOR two byte lists element by element."""
     return [b1 ^ b2 for b1, b2 in zip(data1, data2)]
 
-def crypt(method, key, input_data, output_data):
-    """Encrypt or decrypt hex input; RC4 applies the same operation for both."""
-    key_bytes = hex_to_bytes(key.read().strip())
-    data = hex_to_bytes(input_data.read().strip())
+def crypt(method, key, input_data, output_data, text=False):
+    """Encrypt or decrypt; with text, key and plaintext are plain text and ciphertext stays hex."""
+    to_bytes = text_to_bytes if text else hex_to_bytes
+    key_bytes = to_bytes(key.read().strip())
+
+    if text and method == 'dec':
+        data = hex_to_bytes(input_data.read().strip())
+    else:
+        data = to_bytes(input_data.read().strip())
 
     state = key_scheduling(key_bytes)
     stream = keystream(state, len(data))
+    result = xor(data, stream)
 
-    return output_data.write(bytes_to_hex(xor(data, stream)))
+    if text and method == 'dec':
+        return output_data.write(bytes_to_text(result))
+    return output_data.write(bytes_to_hex(result))
 
 def main():
     parser = argparse.ArgumentParser(description='RC4 Encryption')
@@ -54,13 +70,14 @@ def main():
     method_group.add_argument('--enc', action='store_const', dest='method', const='enc', help='Encryption method')
     method_group.add_argument('--dec', action='store_const', dest='method', const='dec', help='Decryption method')
 
-    parser.add_argument('key', type=argparse.FileType('r'), help='File contain the key (hex)')
-    parser.add_argument('input', type=argparse.FileType('r'), help='File contain the input (hex)')
-    parser.add_argument('output', type=argparse.FileType('w'), help='File to write the output (hex)')
+    parser.add_argument('--text', action='store_true', help='Key and plaintext are plain text; ciphertext stays hex')
+    parser.add_argument('key', type=argparse.FileType('r', encoding='utf-8-sig'), help='File contain the key (hex, or text with --text)')
+    parser.add_argument('input', type=argparse.FileType('r', encoding='utf-8-sig'), help='File contain the input (hex, or text with --text on --enc)')
+    parser.add_argument('output', type=argparse.FileType('w', encoding='utf-8'), help='File to write the output (hex, or text with --text on --dec)')
 
     args = parser.parse_args()
 
-    crypt(args.method, args.key, args.input, args.output)
+    crypt(args.method, args.key, args.input, args.output, args.text)
 
 if __name__ == '__main__':
     main()

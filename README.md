@@ -85,6 +85,13 @@ python RC4.py --dec <key> <input> <output>
 
 `--enc` and `--dec` perform the identical operation and are kept only for interface parity with the DES module.
 
+Add `--text` to use plain text for the key and plaintext. The ciphertext is always hex.
+
+```text
+python RC4.py --text --enc <key> <input> <output>   (key and input are plain text, output is hex)
+python RC4.py --text --dec <key> <input> <output>   (input is hex, output is plain text)
+```
+
 Example (test vector, key = `Key`, plaintext = `Plaintext`):
 
 ```text
