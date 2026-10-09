@@ -11,6 +11,8 @@ RC4 is a symmetric-key **stream cipher** designed by Ron Rivest in 1987. Unlike 
 
 ## RC4 Scheme
 
+![RC4 Scheme](https://media.geeksforgeeks.org/wp-content/cdn-uploads/55-2.png)
+
 ```text
 Key
  |
@@ -59,6 +61,10 @@ for each byte:
     swap(S[i], S[j])
     K = S[(S[i] + S[j]) mod 256]
 ```
+
+![RC4 lookup stage](https://upload.wikimedia.org/wikipedia/commons/e/e9/RC4.svg)
+
+The output byte `K` is found by adding `S[i]` and `S[j]` modulo 256 and using the sum as an index into `S`.
 
 ---
 
