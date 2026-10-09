@@ -3,23 +3,18 @@ import argparse
 STATE_SIZE = 256
 
 def hex_to_bytes(string):
-    """Convert a hex string to a list of byte values."""
     return list(bytes.fromhex(string))
 
 def bytes_to_hex(data):
-    """Convert a list of byte values to an uppercase hex string."""
     return bytes(data).hex().upper()
 
 def text_to_bytes(string):
-    """Convert a UTF-8 string to a list of byte values."""
     return list(string.encode('utf-8'))
 
 def bytes_to_text(data):
-    """Convert a list of byte values to a UTF-8 string."""
     return bytes(data).decode('utf-8')
 
 def key_scheduling(key):
-    """KSA: build the initial permuted state array from the key."""
     if not key:
         raise ValueError("Key must not be empty")
 
@@ -31,7 +26,6 @@ def key_scheduling(key):
     return state
 
 def keystream(state, length):
-    """PRGA: generate `length` keystream bytes from the state array."""
     i = j = 0
     stream = []
     for _ in range(length):
@@ -42,11 +36,9 @@ def keystream(state, length):
     return stream
 
 def xor(data1, data2):
-    """XOR two byte lists element by element."""
     return [b1 ^ b2 for b1, b2 in zip(data1, data2)]
 
 def crypt(method, key, input_data, output_data, text=False):
-    """Encrypt or decrypt; with text, key and plaintext are plain text and ciphertext stays hex."""
     to_bytes = text_to_bytes if text else hex_to_bytes
     key_bytes = to_bytes(key.read().strip())
 
